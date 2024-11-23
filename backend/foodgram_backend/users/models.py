@@ -19,14 +19,21 @@ class MyUser(AbstractUser):
         max_length=150,
         unique=True,
     )
+    avatar = models.ImageField(
+        blank=True,
+        null=True,
+        upload_to='media/avatars',
+    )
 
 
 class Subscription(models.Model):
     user = models.ForeignKey(
         MyUser,
+        related_name='follower',
         on_delete=models.CASCADE,
     )
     author = models.ForeignKey(
         MyUser,
+        related_name='author',
         on_delete=models.CASCADE,
     )

@@ -1,4 +1,7 @@
+import base64
+
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 from recipes.models import Tag, Ingredient, Recipe, RecipeIngredient, Favorite, ShoppingCart
@@ -7,7 +10,28 @@ from users.models import Subscription
 User = get_user_model()
 
 
+class Base64ImageField(serializers.ImageField):
+
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswitch('data.image'):
+            img_format, img_str = data.split(';base64')
+            ext = img_format.split('/')[-1]
+            data = ContentFile(base64.b64decode(img_str), name='image' + ext)
+            return super().to_internal_value(data)
+
+
+class AvatarSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField(allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ['avatar', ]
+
+
 class MyUserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+    avatar = Base64ImageField(allow_null=True, required=False)
+
     class Meta:
         model = User
         fields = [
@@ -31,12 +55,6 @@ class MyUserCreateSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
         ]
-
-
-class AvatarSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['avatar', ]
 
 
 class TagSerializer(serializers.ModelSerializer):

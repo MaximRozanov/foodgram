@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from api.permissions import IsAuthorOrAdminOrReadOnly
 from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, CreateRecipeSerializer, \
-    SubscriptionSerializer, ViewSubscriptionSerializer, FavoriteSerializer, ShoppingCartSerializer
+    SubscriptionSerializer, ViewSubscriptionSerializer, FavoriteSerializer, ShoppingCartSerializer, AvatarSerializer
 from recipes.models import Tag, Ingredient, Recipe, Favorite, ShoppingCart
 from users.models import Subscription
 
@@ -41,6 +41,26 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return context
 
 
+class AvatarView(APIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def put(self, request, *args, **kwargs):
+        user = request.user
+        serializer = AvatarSerializer(instance=user, data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        user = request.user
+        if user.avatar:
+            user.avatar.delete()
+            user.avatar = None
+            user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class ViewSubscriptionView(APIView):
     permission_classes = [IsAuthenticated, ]
 
@@ -63,7 +83,7 @@ class ViewSubscriptionView(APIView):
 
 
 class SubscribeView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, ]
 
     def post(self, request, id):
         data = {

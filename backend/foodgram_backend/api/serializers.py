@@ -36,13 +36,19 @@ class MyUserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'email',
+            'id',
             'username',
             'first_name',
             'last_name',
             'is_subscribed',
-            'id',
             'avatar',
         ]
+
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj in request.user.subscribed_users.all()
+        return False
 
 
 class MyUserCreateSerializer(serializers.ModelSerializer):
@@ -54,13 +60,14 @@ class MyUserCreateSerializer(serializers.ModelSerializer):
             'username',
             'first_name',
             'last_name',
+            'password',
         ]
 
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ['id', 'name', 'amount', 'measurement_unit']
+        fields = ['id', 'name', 'slug']
 
 
 class IngredientSerializer(serializers.ModelSerializer):

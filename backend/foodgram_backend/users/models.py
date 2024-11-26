@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models import UniqueConstraint
 
 
 class MyUser(AbstractUser):
@@ -7,6 +9,7 @@ class MyUser(AbstractUser):
         max_length=254,
         blank=False,
         unique=True,
+        null=False,
     )
     first_name = models.CharField(
         max_length=150,
@@ -19,12 +22,27 @@ class MyUser(AbstractUser):
     username = models.CharField(
         max_length=150,
         unique=True,
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='Нельзя символы.'
+            )
+        ]
     )
     avatar = models.ImageField(
         blank=True,
         null=True,
         upload_to='media/avatars',
     )
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+
+    class Meta:
+        ordering = ['username']
+
+    def __str__(self):
+        return self.username
 
 
 class Subscription(models.Model):
@@ -38,3 +56,15 @@ class Subscription(models.Model):
         related_name='author',
         on_delete=models.CASCADE,
     )
+
+    class Meta:
+        ordering = ['-id', ]
+        constraints = [
+            UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_user_author',
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.author}'

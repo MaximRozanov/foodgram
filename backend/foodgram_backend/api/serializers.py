@@ -35,8 +35,8 @@ class MyUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'email',
             'id',
+            'email',
             'username',
             'first_name',
             'last_name',
@@ -46,12 +46,16 @@ class MyUserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            return obj in request.user.subscribed_users.all()
-        return False
+        if request is None or request.user.is_anonymous:
+            return False
+        return Subscription.objects.filter(
+            user=request.user, author=obj
+        ).exists()
 
 
 class MyUserCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
         fields = [
@@ -62,6 +66,17 @@ class MyUserCreateSerializer(serializers.ModelSerializer):
             'last_name',
             'password',
         ]
+
+    def create(self, validated_data):
+        user = User(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
 class TagSerializer(serializers.ModelSerializer):

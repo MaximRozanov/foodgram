@@ -1,10 +1,13 @@
 from django.contrib.auth import get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from api.filters import IngredientFilter, RecipeFilter
+from api.pagination import CustomPagination
 from api.permissions import IsAuthorOrAdminOrReadOnly
 from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, CreateRecipeSerializer, \
     SubscriptionSerializer, ViewSubscriptionSerializer, FavoriteSerializer, ShoppingCartSerializer, AvatarSerializer
@@ -16,19 +19,26 @@ User = get_user_model()
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny, ]
+    pagination_class = None
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny, ]
+    pagination_class = None
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
+    filter_backends = [IngredientFilter, ]
+    search_fields = ['^name', ]
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthorOrAdminOrReadOnly, ]  # Добавить только ток авторизованный пермишн
+    pagination_class = CustomPagination
     queryset = Recipe.objects.all()
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -63,6 +73,7 @@ class AvatarView(APIView):
 
 class ViewSubscriptionView(APIView):
     permission_classes = [IsAuthenticated, ]
+    pagination_class = CustomPagination
 
     def get_queryset(self, user):
         return User.objects.filter(author__user=user)
@@ -104,6 +115,7 @@ class SubscribeView(APIView):
 
 class FavoriteView(APIView):
     permission_classes = [IsAuthenticated, ]
+    pagination_class = CustomPagination
 
     def post(self, request, id):
         data = {

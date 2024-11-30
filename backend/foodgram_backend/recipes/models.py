@@ -75,7 +75,7 @@ class Recipe(models.Model):
         related_name='recipes',
 
     )
-    # не забыть добавить константу
+    # не забыть добавить константы
     cooking_time = models.IntegerField(
         validators=[
             MinValueValidator(
@@ -161,12 +161,12 @@ class Favorite(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorite',
+        related_name='favorites',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorite',
+        related_name='favorites',
     )
 
     class Meta:

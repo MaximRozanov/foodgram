@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.views.decorators.http import require_GET
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, action
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -17,7 +20,8 @@ from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import IsAuthorOrAdminOrReadOnly
 from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, CreateRecipeSerializer, \
-    SubscriptionSerializer, ViewSubscriptionSerializer, FavoriteSerializer, ShoppingCartSerializer, AvatarSerializer
+    SubscriptionSerializer, ViewSubscriptionSerializer, FavoriteSerializer, ShoppingCartSerializer, AvatarSerializer, \
+    MyUserSerializer
 from recipes.models import Tag, Ingredient, Recipe, Favorite, ShoppingCart, RecipeIngredient
 from users.models import Subscription
 
@@ -48,7 +52,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method == 'GET' and self.request.path.endswith('/get-link/'):
             return RecipeSerializer
         return CreateRecipeSerializer
 
@@ -68,7 +72,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, pk=pk)
         rev_link = reverse('short_url', args=[recipe.pk])
         return Response({'short-link': request.build_absolute_uri(rev_link)},
-                        status=status.HTTP_200_OK)
+                        status=status.HTTP_200_OK, )
 
 
 class AvatarView(APIView):
@@ -195,6 +199,12 @@ class ShoppingCartView(APIView):
 
 
 @api_view(['GET'])
+def short_url(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    return redirect(f'/recipes/{recipe.pk}/')
+
+
+@api_view(['GET'])
 def download_shopping_cart(request):
     ingredients = RecipeIngredient.objects.filter(
         recipe__shopping_cart__user=request.user
@@ -213,8 +223,14 @@ def download_shopping_cart(request):
         ingredient_line = f"{i['ingredient__name']} - {i['amount']} {i['ingredient__measurement_unit']}"
         p.drawString(100, y_position, ingredient_line)
         y_position -= 20
-
     p.showPage()
     p.save()
-
     return response
+
+
+class UserViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def me(self, request):
+        serializer = MyUserSerializer(request.user)
+        return Response(serializer.data)

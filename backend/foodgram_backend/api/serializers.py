@@ -260,16 +260,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
 
 class ShowFavoriteSerializer(serializers.ModelSerializer):
-    """ Сериализатор для отображения избранного. """
-
     class Meta:
         model = Recipe
         fields = ['id', 'name', 'image', 'cooking_time']
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    """ Сериализатор для списка покупок. """
-
     class Meta:
         model = ShoppingCart
         fields = ['user', 'recipe']
@@ -281,8 +277,6 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    """ Сериализатор модели Избранное. """
-
     class Meta:
         model = Favorite
         fields = ['user', 'recipe']
@@ -319,11 +313,10 @@ class ViewSubscriptionSerializer(serializers.ModelSerializer):
         return Subscription.objects.filter(user=request.user, author=obj).exists()
 
     def get_recipes(self, obj):
+
         request = self.context.get('request')
-        if request.user.is_anonymous:
-            return []
         recipes = Recipe.objects.filter(author=obj)
-        limit = request.query_params.get('recipes_limit')
+        limit = request.query_params.get('recipes_limit', None)
         if limit:
             recipes = recipes[:int(limit)]
         return RecipeSerializer(recipes, many=True, context={'request': request}).data

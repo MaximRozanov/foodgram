@@ -34,3 +34,4 @@ tzdata==2024.2
 urllib3==2.2.3
 gunicorn==23.0.0
 python-dotenv==1.0.1
+psycopg==3.2.3

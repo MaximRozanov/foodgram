@@ -19,7 +19,7 @@ DEBUG = os.getenv('DEBUG', 'False')
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = True
 
-ALLOWED_HOSTS = ['51.250.106.169', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['51.250.106.169', '127.0.0.1', 'localhost', 'foodgramdiplom.zapto.org']
 
 # Application definition
 

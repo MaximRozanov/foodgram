@@ -2,27 +2,27 @@ from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.views.decorators.http import require_GET
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, action
-from rest_framework.exceptions import ValidationError
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import IsAuthorOrAdminOrReadOnly
-from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, CreateRecipeSerializer, \
-    SubscriptionSerializer, ViewSubscriptionSerializer, FavoriteSerializer, ShoppingCartSerializer, AvatarSerializer, \
-    MyUserSerializer
-from recipes.models import Tag, Ingredient, Recipe, Favorite, ShoppingCart, RecipeIngredient
+from api.serializers import (AvatarSerializer, CreateRecipeSerializer,
+                             FavoriteSerializer, IngredientSerializer,
+                             MyUserSerializer, RecipeSerializer,
+                             ShoppingCartSerializer, SubscriptionSerializer,
+                             TagSerializer, ViewSubscriptionSerializer)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 from users.models import Subscription
 
 User = get_user_model()
@@ -101,7 +101,11 @@ class ViewSubscriptionView(APIView):
         if page is None:
             return Response([], status=status.HTTP_204_NO_CONTENT)
 
-        serializer = ViewSubscriptionSerializer(page, many=True, context={'request': request})
+        serializer = ViewSubscriptionSerializer(
+            page,
+            many=True,
+            context={'request': request}
+        )
         return paginator.get_paginated_response(serializer.data)
 
 
@@ -111,23 +115,38 @@ class SubscribeView(APIView):
     def post(self, request, id):
         author = get_object_or_404(User, id=id)
         if request.user.id == author.id:
-            return Response({'detail': 'Нельзя подписываться на себя.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': 'Нельзя подписываться на себя.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         data = {
             'user': request.user.id,
             'author': author.id,
         }
-        serializer = SubscriptionSerializer(data=data, context={'request': request})
+        serializer = SubscriptionSerializer(
+            data=data,
+            context={'request': request}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
         author = get_object_or_404(User, id=id)
-        subscription = Subscription.objects.filter(user=request.user, author=author).first()
+        subscription = Subscription.objects.filter(
+            user=request.user,
+            author=author,
+        ).first()
         if subscription is None:
-            return Response({'detail': 'Подписка нет насяльника.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'detail': 'Подписка нет насяльника.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         subscription.delete()
-        return Response({'detail': 'Отписано'}, status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'detail': 'Отписано'},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 class FavoriteView(APIView):
@@ -155,7 +174,10 @@ class FavoriteView(APIView):
         recipe = get_object_or_404(Recipe, id=id)
         if Favorite.objects.filter(
                 user=request.user, recipe=recipe).exists():
-            Favorite.objects.filter(user=request.user, recipe=recipe).delete()
+            Favorite.objects.filter(
+                user=request.user,
+                recipe=recipe
+            ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -206,14 +228,20 @@ def download_shopping_cart(request):
     ).annotate(amount=Sum('amount'))
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
+    response['Content-Disposition'] = (
+        'attachment; '
+        'filename="shopping_list.pdf"'
+    )
 
     p = canvas.Canvas(response, pagesize=letter)
     p.drawString(100, 750, "Cписок покупок:")
 
     y_position = 730
     for i in ingredients:
-        ingredient_line = f"{i['ingredient__name']} - {i['amount']} {i['ingredient__measurement_unit']}"
+        ingredient_line = (
+            f"{i['ingredient__name']} - "
+            f"{i['amount']} {i['ingredient__measurement_unit']}"
+        )
         p.drawString(100, y_position, ingredient_line)
         y_position -= 20
     p.showPage()

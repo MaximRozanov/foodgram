@@ -1,49 +1,43 @@
 volumes:
-  pg:
+  pg_data:
   static:
   media:
   redoc:
 
 services:
+
   db:
     image: postgres:13
-    restart: always
+    env_file: ../.env
     volumes:
-      - pg:/var/lib/postgresql/data/
-    env_file:
-      - ../.env
+      - pg_data:/var/lib/postgresql/data
 
   backend:
     image: maxrozanov/foodgram_backend
-    restart: always
+    env_file: ../.env
     volumes:
       - static:/backend_static/
       - media:/app/media/
       - redoc:/app/api/docs/
-    env_file:
-      - ../.env
     depends_on:
       - db
 
   frontend:
     image: maxrozanov/foodgram_frontend
+    env_file: ../.env
+    command: cp -r /app/build/. /frontend_static/
     volumes:
       - static:/frontend_static
-    command: cp -r /app/build/. /frontend_static/
-    env_file:
-      - ../.env
 
   gateway:
     image: maxrozanov/foodgram_gateway
-    restart: always
+    env_file: ../.env
     ports:
-      - "9090:80"
+      - "9100:80"
     volumes:
       - redoc:/usr/share/nginx/html/api/docs/
-      - static:/staticfiles/
-      - media:/app/media/
-    env_file:
-      - ../.env
+      - static:/static/
+      - media:/media/
     depends_on:
       - frontend
       - backend

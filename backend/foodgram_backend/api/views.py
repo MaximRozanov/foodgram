@@ -52,7 +52,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.request.method == 'GET' and self.request.path.endswith('/get-link/'):
+        if self.request.method == 'GET':
             return RecipeSerializer
         return CreateRecipeSerializer
 
@@ -61,13 +61,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context.update({'request': self.request})
         return context
 
-    @action(
-        detail=True,
-        methods=['GET'],
-        permission_classes=[AllowAny],
-        url_path='get-link',
-        url_name='get-link',
-    )
     def get_link(self, request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
         rev_link = reverse('short_url', args=[recipe.pk])

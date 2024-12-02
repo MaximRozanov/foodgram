@@ -2,9 +2,11 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import UniqueConstraint
-
-from foodgram_backend.constants import INGREDIENT_LENGTH_LIMIT, UNIT_LENGTH_LIMIT, TAG_LENGTH_LIMIT, \
-    RECIPE_LENGTH_LIMIT, COOKING_TIME_MIN, INGREDIENT_AMOUNT_MIN
+from foodgram_backend.constants import (COOKING_TIME_MIN,
+                                        INGREDIENT_AMOUNT_MIN,
+                                        INGREDIENT_LENGTH_LIMIT,
+                                        RECIPE_LENGTH_LIMIT, TAG_LENGTH_LIMIT,
+                                        UNIT_LENGTH_LIMIT)
 
 User = get_user_model()
 

@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import UniqueConstraint
-
 from foodgram_backend.constants import EMAIL_LENGTH_LIMIT, USER_LENGTH_LIMIT
 
 

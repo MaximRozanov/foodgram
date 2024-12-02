@@ -345,13 +345,12 @@ class ViewSubscriptionSerializer(serializers.ModelSerializer):
         ).exists()
 
     def get_recipes(self, obj):
-
         request = self.context.get('request')
         recipes = Recipe.objects.filter(author=obj)
         limit = request.query_params.get('recipes_limit', None)
         if limit:
             recipes = recipes[:int(limit)]
-        return RecipeSerializer(
+        return ShowFavoriteSerializer(
             recipes,
             many=True,
             context={'request': request}

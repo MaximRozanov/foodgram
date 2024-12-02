@@ -33,7 +33,7 @@ services:
     image: maxrozanov/foodgram_gateway
     env_file: ../.env
     ports:
-      - "9100:80"
+      - "9090:80"
     volumes:
       - redoc:/usr/share/nginx/html/api/docs/
       - static:/static/

@@ -3,16 +3,19 @@ from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
+from foodgram_backend.constants import INGREDIENT_LENGTH_LIMIT, UNIT_LENGTH_LIMIT, TAG_LENGTH_LIMIT, \
+    RECIPE_LENGTH_LIMIT, COOKING_TIME_MIN, INGREDIENT_AMOUNT_MIN
+
 User = get_user_model()
 
 
 class Ingredient(models.Model):
     name = models.CharField(
-        max_length=128,
+        max_length=INGREDIENT_LENGTH_LIMIT,
         unique=True,
     )
     measurement_unit = models.CharField(
-        max_length=64,
+        max_length=UNIT_LENGTH_LIMIT,
     )
 
     class Meta:
@@ -30,11 +33,11 @@ class Ingredient(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(
-        max_length=32,
+        max_length=TAG_LENGTH_LIMIT,
         unique=True,
     )
     slug = models.SlugField(
-        max_length=32,
+        max_length=TAG_LENGTH_LIMIT,
         unique=True,
         validators=[
             RegexValidator(
@@ -55,7 +58,7 @@ class Recipe(models.Model):
         related_name='recipes',
     )
     name = models.CharField(
-        max_length=256,
+        max_length=RECIPE_LENGTH_LIMIT,
     )
     image = models.ImageField(
         blank=False,
@@ -79,8 +82,8 @@ class Recipe(models.Model):
     cooking_time = models.IntegerField(
         validators=[
             MinValueValidator(
-                1,
-                message=f'нельзя меньше {1}'
+                COOKING_TIME_MIN,
+                message=f'нельзя меньше {COOKING_TIME_MIN}'
             )
         ],
         help_text='Время приготовления в минутах',
@@ -101,8 +104,8 @@ class RecipeIngredient(models.Model):
     amount = models.FloatField(
         validators=[
             MinValueValidator(
-                0.1,
-                f'нельзя меньше {1}'
+                INGREDIENT_AMOUNT_MIN,
+                f'нельзя меньше {INGREDIENT_AMOUNT_MIN}'
             )
         ],
     )

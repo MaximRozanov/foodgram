@@ -3,24 +3,26 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
+from foodgram_backend.constants import EMAIL_LENGTH_LIMIT, USER_LENGTH_LIMIT
+
 
 class MyUser(AbstractUser):
     email = models.EmailField(
-        max_length=254,
+        max_length=EMAIL_LENGTH_LIMIT,
         blank=False,
         unique=True,
         null=False,
     )
     first_name = models.CharField(
-        max_length=150,
+        max_length=USER_LENGTH_LIMIT,
         blank=False,
     )
     last_name = models.CharField(
-        max_length=150,
+        max_length=USER_LENGTH_LIMIT,
         blank=False,
     )
     username = models.CharField(
-        max_length=150,
+        max_length=USER_LENGTH_LIMIT,
         unique=True,
         validators=[
             RegexValidator(

@@ -227,7 +227,7 @@ def download_shopping_cart(request):
     ).annotate(total_amount=Sum('amount'))
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
+    response['Content-Disposition'] = 'attachment;filename="shopping_list.pdf"'
 
     pdf_canvas = canvas.Canvas(response, pagesize=letter)
     pdf_canvas.drawString(100, 750, 'Cписок покупок:')
@@ -236,7 +236,8 @@ def download_shopping_cart(request):
     for ingredient in shopping_cart_ingredients:
         ingredient_line = (
             f"{ingredient['ingredient__name']} - "
-            f"{ingredient['total_amount']} {ingredient['ingredient__measurement_unit']}"
+            f"{ingredient['total_amount']}"
+            f"{ingredient['ingredient__measurement_unit']}"
         )
         pdf_canvas.drawString(100, y_position, ingredient_line)
         y_position -= 20

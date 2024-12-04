@@ -250,16 +250,22 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
         return recipe
 
-    @transaction.atomic
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
+
+        if 'image' in validated_data:
+            instance.image = validated_data.pop('image')
+
         RecipeTag.objects.filter(recipe=instance).delete()
         RecipeIngredient.objects.filter(recipe=instance).delete()
+
         ingredients = validated_data.pop('ingredients', [])
         tags = validated_data.pop('tags', [])
+
         self.create_ingredients(ingredients, instance)
         self.create_tags(tags, instance)
 
+        instance.save()
         return instance
 
     def to_representation(self, instance):

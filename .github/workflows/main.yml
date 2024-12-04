@@ -137,4 +137,4 @@ jobs:
           sudo docker compose -f infra/docker-compose.production.yml exec backend python manage.py migrate
           sudo docker compose -f infra/docker-compose.production.yml exec backend python manage.py collectstatic
           sudo docker compose -f infra/docker-compose.production.yml exec backend cp -r /app/static/. /backend_static/static/
-                    sudo docker compose -f infra/docker-compose.production.yml exec backend python manage.py loaddata data/fixtures.json
+          sudo docker compose -f infra/docker-compose.production.yml exec backend python manage.py loaddata data/fixtures.json

@@ -220,31 +220,29 @@ def short_url(request, pk):
 
 @api_view(['GET'])
 def download_shopping_cart(request):
-    ingredients = RecipeIngredient.objects.filter(
+    shopping_cart_ingredients = RecipeIngredient.objects.filter(
         recipe__shopping_cart__user=request.user
     ).values(
         'ingredient__name', 'ingredient__measurement_unit'
-    ).annotate(amount=Sum('amount'))
+    ).annotate(total_amount=Sum('amount'))
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = (
-        'attachment; '
-        'filename="shopping_list.pdf"'
-    )
+    response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
 
-    p = canvas.Canvas(response, pagesize=letter)
-    p.drawString(100, 750, "Cписок покупок:")
+    pdf_canvas = canvas.Canvas(response, pagesize=letter)
+    pdf_canvas.drawString(100, 750, 'Cписок покупок:')
 
     y_position = 730
-    for i in ingredients:
+    for ingredient in shopping_cart_ingredients:
         ingredient_line = (
-            f"{i['ingredient__name']} - "
-            f"{i['amount']} {i['ingredient__measurement_unit']}"
+            f"{ingredient['ingredient__name']} - "
+            f"{ingredient['total_amount']} {ingredient['ingredient__measurement_unit']}"
         )
-        p.drawString(100, y_position, ingredient_line)
+        pdf_canvas.drawString(100, y_position, ingredient_line)
         y_position -= 20
-    p.showPage()
-    p.save()
+
+    pdf_canvas.showPage()
+    pdf_canvas.save()
     return response
 
 

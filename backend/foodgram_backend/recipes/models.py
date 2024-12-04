@@ -1,5 +1,4 @@
-from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 from foodgram_backend.constants import (COOKING_TIME_MIN,
@@ -8,7 +7,7 @@ from foodgram_backend.constants import (COOKING_TIME_MIN,
                                         RECIPE_LENGTH_LIMIT, TAG_LENGTH_LIMIT,
                                         UNIT_LENGTH_LIMIT)
 
-User = get_user_model()
+from users.models import User
 
 
 class Ingredient(models.Model):
@@ -22,12 +21,12 @@ class Ingredient(models.Model):
 
     class Meta:
         ordering = ['-id']
-        constraints = (
+        constraints = [
             UniqueConstraint(
                 fields=('name', 'measurement_unit'),
                 name='unique_ingredient',
             ),
-        )
+        ]
 
     def __str__(self):
         return f'{self.name}:{self.measurement_unit}'
@@ -41,12 +40,6 @@ class Tag(models.Model):
     slug = models.SlugField(
         max_length=TAG_LENGTH_LIMIT,
         unique=True,
-        validators=[
-            RegexValidator(
-                regex=r'^[-a-zA-Z0-9_]+$',
-                message='Нельзя символы.'
-            )
-        ]
     )
 
     def __str__(self):
@@ -80,15 +73,14 @@ class Recipe(models.Model):
         related_name='recipes',
 
     )
-    # не забыть добавить константы
-    cooking_time = models.IntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(
                 COOKING_TIME_MIN,
                 message=f'нельзя меньше {COOKING_TIME_MIN}'
             )
         ],
-        help_text='Время приготовления в минутах',
+        help_text='Время приготовления в минутах'
     )
 
 
@@ -151,12 +143,12 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
-        constraints = (
+        constraints = [
             UniqueConstraint(
                 fields=['user', 'recipe'],
                 name='unique_cart_user_recipe',
             ),
-        )
+        ]
 
     def __str__(self):
         return f'{self.recipe} в корзине {self.user}'
@@ -176,13 +168,12 @@ class Favorite(models.Model):
 
     class Meta:
         ordering = ['-id']
-
-    constraints = (
-        UniqueConstraint(
-            fields=['user', 'recipe'],
-            name='unique_favorite_user_recipe',
-        )
-    )
+        constraints = [
+            UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite_user_recipe',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.recipe} в избранных у {self.user}'

@@ -1,4 +1,5 @@
-from django.contrib.auth import get_user_model
+
+
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -18,14 +19,12 @@ from api.pagination import CustomPagination
 from api.permissions import IsAuthorOrAdminOrReadOnly
 from api.serializers import (AvatarSerializer, CreateRecipeSerializer,
                              FavoriteSerializer, IngredientSerializer,
-                             MyUserSerializer, RecipeSerializer,
-                             ShoppingCartSerializer, SubscriptionSerializer,
-                             TagSerializer, ViewSubscriptionSerializer)
+                             RecipeSerializer, ShoppingCartSerializer,
+                             SubscriptionSerializer, TagSerializer,
+                             UserSerializer, ViewSubscriptionSerializer)
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
-from users.models import Subscription
-
-User = get_user_model()
+from users.models import Subscription, User
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -253,5 +252,5 @@ class UserViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     def me(self, request):
-        serializer = MyUserSerializer(request.user)
+        serializer = UserSerializer(request.user)
         return Response(serializer.data)

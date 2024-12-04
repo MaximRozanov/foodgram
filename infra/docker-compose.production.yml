@@ -11,9 +11,10 @@ services:
     env_file: ../.env
     volumes:
       - pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   backend:
-    image: maxrozanov/foodgram_backend
+    image: maxrozanov/foodgram_backend:latest
     env_file: ../.env
     volumes:
       - static:/backend_static/
@@ -23,14 +24,14 @@ services:
       - db
 
   frontend:
-    image: maxrozanov/foodgram_frontend
+    image: maxrozanov/foodgram_frontend:latest
     env_file: ../.env
     command: cp -r /app/build/. /frontend_static/
     volumes:
       - static:/frontend_static
 
   gateway:
-    image: maxrozanov/foodgram_gateway
+    image: maxrozanov/foodgram_gateway:latest
     env_file: ../.env
     ports:
       - "9090:80"

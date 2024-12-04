@@ -1,29 +1,31 @@
 from django.contrib import admin
-from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from users.models import Subscription
-
-User = get_user_model()
+from users.models import Subscription, User
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(BaseUserAdmin):
     list_display = [
         'username',
         'email',
         'first_name',
         'last_name',
+        'is_active',
+        'is_staff',
     ]
     search_fields = [
         'username',
         'email',
+        'first_name',
+        'last_name',
     ]
     list_filter = [
-        'username',
-        'email',
+        'is_active',
+        'is_staff',
     ]
-    ordering = ['username', ]
-    empty_value_display = '-empty-'
+    ordering = ['username']
+    empty_value_display = '-пусто-'
 
 
 @admin.register(Subscription)

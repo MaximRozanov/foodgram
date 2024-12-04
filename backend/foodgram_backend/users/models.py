@@ -5,20 +5,17 @@ from django.db.models import UniqueConstraint
 from foodgram_backend.constants import EMAIL_LENGTH_LIMIT, USER_LENGTH_LIMIT
 
 
-class MyUser(AbstractUser):
+class User(AbstractUser):
     email = models.EmailField(
         max_length=EMAIL_LENGTH_LIMIT,
-        blank=False,
         unique=True,
         null=False,
     )
     first_name = models.CharField(
         max_length=USER_LENGTH_LIMIT,
-        blank=False,
     )
     last_name = models.CharField(
         max_length=USER_LENGTH_LIMIT,
-        blank=False,
     )
     username = models.CharField(
         max_length=USER_LENGTH_LIMIT,
@@ -48,12 +45,12 @@ class MyUser(AbstractUser):
 
 class Subscription(models.Model):
     user = models.ForeignKey(
-        MyUser,
+        User,
         related_name='subscriptions',
         on_delete=models.CASCADE,
     )
     author = models.ForeignKey(
-        MyUser,
+        User,
         related_name='followers',
         on_delete=models.CASCADE,
     )

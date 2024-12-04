@@ -93,7 +93,7 @@ class ViewSubscriptionView(APIView):
 
     def get(self, request):
         user = request.user
-        queryset = User.objects.filter(subscriptions__user=user)
+        queryset = User.objects.filter(followers__user=user)
         paginator = self.pagination_class()
 
         page = paginator.paginate_queryset(queryset, request)

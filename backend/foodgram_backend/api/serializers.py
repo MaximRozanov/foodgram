@@ -264,7 +264,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         self.create_ingredients(ingredients, instance)
 
         RecipeTag.objects.filter(recipe=instance).delete()
-        self.add_tags(tags, instance)
+        self.create_tags(tags, instance)
 
         instance.save()
         return instance

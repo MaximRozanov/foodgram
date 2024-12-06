@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
+
 from foodgram_backend.constants import (COOKING_TIME_MIN,
                                         INGREDIENT_AMOUNT_MIN,
                                         INGREDIENT_LENGTH_LIMIT,

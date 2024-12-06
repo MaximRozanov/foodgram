@@ -1,7 +1,7 @@
+from datetime import datetime
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models import UniqueConstraint
-
 from foodgram_backend.constants import (COOKING_TIME_MIN,
                                         INGREDIENT_AMOUNT_MIN,
                                         INGREDIENT_LENGTH_LIMIT,
@@ -85,6 +85,7 @@ class Recipe(models.Model):
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
+        default=datetime.datetime.now
     )
 
 

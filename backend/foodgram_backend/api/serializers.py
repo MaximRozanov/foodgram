@@ -182,14 +182,21 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
         if len(existing_ingredients) != len(ingredient_ids):
             existing_ids = {
-                ingredient.id for ingredient in existing_ingredients
+                ingredient.id
+                for ingredient in existing_ingredients
             }
             missing_ids = set(ingredient_ids) - existing_ids
+
+            missing_ids_str = ', '.join(map(str, missing_ids))
+
             raise serializers.ValidationError(
-                {'ingredients': (
-                    f'Ингредиенты с id {", ".join(map(str, missing_ids))} '
-                    'не существуют.'
-                )}
+                {
+                    'ingredients': (
+                        'Ингредиент id {missing_ids_str} не существуют'.format(
+                            missing_ids_str=missing_ids_str
+                        )
+                    )
+                }
             )
         ingredient_count = {}
         for ingredient in ingredients:
@@ -218,9 +225,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 {'tags': 'Теги не должны повторяться.'}
             )
         if 'image' not in self.initial_data or not self.initial_data['image']:
-            raise serializers.ValidationError(
-                {'image': 'Это поле не может быть пустым.'}
-            )
+            if not hasattr(self.instance, 'image') or not self.instance.image:
+                raise serializers.ValidationError(
+                    {'image': 'Это поле не может быть пустым.'}
+                )
         return data
 
     def create_tags(self, tags, recipe):

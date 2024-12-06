@@ -2,10 +2,6 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django_filters.rest_framework import DjangoFilterBackend
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.generics import get_object_or_404
@@ -46,7 +42,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthorOrAdminOrReadOnly, ]
     pagination_class = CustomPagination
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.all().order_by('-pub_date')
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
 
@@ -220,34 +216,22 @@ def short_url(request, pk):
 
 @api_view(['GET'])
 def download_shopping_cart(request):
-    shopping_cart_ingredients = RecipeIngredient.objects.filter(
+    ingredient_list = "Cписок покупок:"
+    ingredients = RecipeIngredient.objects.filter(
         recipe__shopping_cart__user=request.user
     ).values(
         'ingredient__name', 'ingredient__measurement_unit'
-    ).annotate(total_amount=Sum('amount'))
-
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment;filename="shopping_list.pdf"'
-
-    pdf_canvas = canvas.Canvas(response, pagesize=letter)
-
-    pdfmetrics.registerFont(TTFont('Arial', 'Arial.ttf'))
-    pdf_canvas.setFont("Arial", 12)
-
-    pdf_canvas.drawString(100, 750, 'Cписок покупок:')
-
-    y_position = 730
-    for ingredient in shopping_cart_ingredients:
-        ingredient_line = (
-            f"{ingredient['ingredient__name']} - "
-            f"{ingredient['total_amount']} "
-            f"{ingredient['ingredient__measurement_unit']}"
+    ).annotate(amount=Sum('amount'))
+    for num, i in enumerate(ingredients):
+        ingredient_list += (
+            f"\n{i['ingredient__name']} - "
+            f"{i['amount']} {i['ingredient__measurement_unit']}"
         )
-        pdf_canvas.drawString(100, y_position, ingredient_line)
-        y_position -= 20
-
-    pdf_canvas.showPage()
-    pdf_canvas.save()
+        if num < ingredients.count() - 1:
+            ingredient_list += ', '
+    file = 'shopping_list'
+    response = HttpResponse(ingredient_list, 'Content-Type: application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{file}.pdf"'
     return response
 
 

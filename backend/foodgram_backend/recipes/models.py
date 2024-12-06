@@ -85,7 +85,7 @@ class Recipe(models.Model):
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
-        default=datetime.datetime.now
+        default=datetime.now,
     )
 
 

@@ -84,7 +84,7 @@ class Recipe(models.Model):
         help_text='Время приготовления в минутах'
     )
     pub_date = models.DateTimeField(
-        default=datetime.now,
+        auto_now_add=True,
     )
 
 

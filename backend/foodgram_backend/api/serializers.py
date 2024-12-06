@@ -257,9 +257,9 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
         instance = super().update(instance, validated_data)
 
-        for field in ['image', 'name', 'text', 'cooking_time']:
-            if field in validated_data:
-                setattr(instance, field, validated_data.pop(field))
+        # Обработка изображения
+        if 'image' in validated_data and validated_data['image']:
+            instance.image = validated_data.pop('image')
 
         if ingredients is not None:
             RecipeIngredient.objects.filter(recipe=instance).delete()

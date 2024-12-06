@@ -227,7 +227,7 @@ def download_shopping_cart(request):
     ).annotate(total_amount=Sum('amount'))
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
+    response['Content-Disposition'] = 'attachment;filename="shopping_list.pdf"'
 
     pdf_canvas = canvas.Canvas(response, pagesize=letter)
 

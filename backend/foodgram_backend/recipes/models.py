@@ -82,6 +82,9 @@ class Recipe(models.Model):
         ],
         help_text='Время приготовления в минутах'
     )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+    )
 
 
 class RecipeIngredient(models.Model):

@@ -10,7 +10,7 @@ services:
     image: postgres:13
     env_file: ../.env
     volumes:
-      - pgg_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
     restart: unless-stopped
 
   backend:

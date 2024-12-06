@@ -1,10 +1,10 @@
-
-
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from reportlab.lib.pagesizes import letter
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
@@ -227,16 +227,20 @@ def download_shopping_cart(request):
     ).annotate(total_amount=Sum('amount'))
 
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment;filename="shopping_list.pdf"'
+    response['Content-Disposition'] = 'attachment; filename="shopping_list.pdf"'
 
     pdf_canvas = canvas.Canvas(response, pagesize=letter)
+
+    pdfmetrics.registerFont(TTFont('Arial', 'Arial.ttf'))
+    pdf_canvas.setFont("Arial", 12)
+
     pdf_canvas.drawString(100, 750, 'Cписок покупок:')
 
     y_position = 730
     for ingredient in shopping_cart_ingredients:
         ingredient_line = (
             f"{ingredient['ingredient__name']} - "
-            f"{ingredient['total_amount']}"
+            f"{ingredient['total_amount']} "
             f"{ingredient['ingredient__measurement_unit']}"
         )
         pdf_canvas.drawString(100, y_position, ingredient_line)

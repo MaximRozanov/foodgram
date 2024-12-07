@@ -58,7 +58,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'], url_path='get-link')
     def get_link(self, request, pk=None):
-        # Изменили id на pk для однородности
         recipe = get_object_or_404(Recipe, pk=pk)
         rev_link = reverse('short_url', args=[recipe.pk])
         return Response({'short-link': request.build_absolute_uri(rev_link)},

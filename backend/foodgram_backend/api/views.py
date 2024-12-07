@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -56,11 +56,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context.update({'request': self.request})
         return context
 
-    def get_link(self, request, id=None):
-        recipe = get_object_or_404(Recipe, pk=id)
+    @action(detail=True, methods=['get'], url_path='get-link')
+    def get_link(self, request, pk=None):
+        # Изменили id на pk для однородности
+        recipe = get_object_or_404(Recipe, pk=pk)
         rev_link = reverse('short_url', args=[recipe.pk])
         return Response({'short-link': request.build_absolute_uri(rev_link)},
-                        status=status.HTTP_200_OK, )
+                        status=status.HTTP_200_OK)
 
 
 class AvatarView(APIView):
